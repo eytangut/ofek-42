@@ -1,45 +1,54 @@
-# Text Adventure Game
+# Text Adventure - Minimal Boilerplate
 
-A multiple-choice based text adventure game built with React.
+A bare-bones, multiple-choice text adventure framework. No assumptions about game mechanics - just a state machine with text and choices.
 
-## Features
+## What This Is
 
-- **Multiple Choice Interface**: Players interact by clicking on available choices, not typing commands
-- **Room-based Navigation**: Explore different rooms with unique descriptions
-- **Inventory System**: Collect and examine items
-- **Locked Doors**: Find keys to unlock new areas
-- **Visual Feedback**: Color-coded choices for different action types
+This is the **absolute minimum** needed for a choice-based text adventure:
+- States with text
+- Choices that lead to other states
+- Simple UI to display and interact
 
-## Architecture
+**No built-in assumptions about:**
+- Inventory
+- Rooms/locations
+- Items
+- Combat
+- Stats
+- Anything else
 
-### Files
+You can build whatever weird game mechanics you want on top of this!
 
-- `gameData.js` - Game world data (rooms, items, descriptions)
-- `gameEngine.js` - Core game logic and state management
-- `TextAdventure.jsx` - Main React component with UI
-- `TextAdventureDemo.jsx` - Standalone demo page
+## Files
+
+- `gameData.js` - Your game content (states and choices)
+- `gameEngine.js` - Minimal state machine (~60 lines)
+- `TextAdventure.jsx` - Simple React UI
 - `index.js` - Module exports
 
-### Game Engine
+## How It Works
 
-The `GameEngine` class manages:
-- Current room and navigation
-- Player inventory
-- Room unlock states
-- Available choices based on game state
-- Action execution
+The game is just a **state machine**:
 
-### Choice Types
+```javascript
+{
+  startingState: 'start',
+  states: {
+    start: {
+      text: 'Some text here',
+      choices: [
+        { id: 'choice1', text: 'Do something', nextState: 'somewhere' }
+      ]
+    }
+  }
+}
+```
 
-- **Move** (🚪) - Navigate between rooms
-- **Take** (✋) - Pick up items
-- **Examine** (🔍) - Look at items closely
-- **Look** (👀) - Survey the current room
-- **Inventory** (🎒) - Check what you're carrying
+Each choice leads to a new state. That's it!
 
 ## Usage
 
-### As a Standalone Component
+### Basic Setup
 
 ```jsx
 import { TextAdventure } from './textAdventure';
@@ -49,39 +58,70 @@ function App() {
 }
 ```
 
-### Customizing Game Data
+### Customize Your Game
 
-Edit `gameData.js` to add:
-- New rooms with descriptions and exits
-- New items with properties
-- Different starting locations
-- More complex room connections
+Edit `gameData.js` to create your story. Just add states and choices.
 
-### Extending the Game Engine
+### Add Custom Mechanics
 
-The `GameEngine` class can be extended to add:
-- NPCs and dialogue
-- Combat systems
-- Puzzles and mini-games
-- Save/load functionality
-- Achievement tracking
+The engine has `customData` for storing anything:
+
+```javascript
+// In your choice handler or extended engine:
+gameEngine.setData('health', 100);
+gameEngine.setData('hasKey', true);
+const health = gameEngine.getData('health');
+```
+
+### Extend the Engine
+
+Want inventory? Combat? Stats? Add them yourself:
+
+```javascript
+class MyGameEngine extends GameEngine {
+  constructor(gameData) {
+    super(gameData);
+    this.inventory = [];
+    this.stats = { health: 100 };
+  }
+  
+  // Add your methods here
+}
+```
+
+### Dynamic Choices
+
+You can generate choices programmatically:
+
+```javascript
+// In gameData.js, use a function to return choices based on game state
+states: {
+  shop: {
+    text: 'Welcome to the shop',
+    choices: (engine) => {
+      const hasGold = engine.getData('gold') > 0;
+      return hasGold 
+        ? [{ id: 'buy', text: 'Buy something', nextState: 'bought' }]
+        : [{ id: 'leave', text: 'Leave', nextState: 'outside' }];
+    }
+  }
+}
+```
+
+## Examples of What You Can Build
+
+- Choose-your-own-adventure stories
+- Puzzle games
+- Dialogue systems
+- Interactive fiction
+- Dating sims
+- RPG conversations
+- Mystery games
+- Horror games
+- Comedy adventures
+- Educational content
+- Literally anything with choices
 
 ## Current State
 
-🚧 **This game is currently in development and not integrated into the main site.**
-
-The boilerplate code is complete and functional, but it is kept separate from the main application until ready for deployment.
-
-## Testing
-
-To test the game locally, you can temporarily import it in your main app or create a test route for it.
-
-## Future Enhancements
-
-- More rooms and items
-- Story progression and endings
-- Character stats and attributes
-- Quest system
-- Sound effects and music
-- Save/load game state
-- Multiple storylines
+🚧 **Not integrated into the main site** - This is standalone boilerplate code ready for you to customize and deploy when ready.
