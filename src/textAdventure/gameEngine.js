@@ -38,14 +38,25 @@ export class GameEngine {
     
     // Execute action if specified
     if (choice.action) {
-      const actionFn = this.gameData.actions[choice.action];
+      const actionFn = this.gameData.actions?.[choice.action];
       if (actionFn) {
         actionResult = actionFn(this);
+      } else {
+        console.error(`Action "${choice.action}" not found in gameData.actions`);
+        actionResult = `Error: Action "${choice.action}" not found`;
       }
     }
     
     // Transition to new state if specified
     if (choice.nextState) {
+      if (!this.gameData.states[choice.nextState]) {
+        console.error(`State "${choice.nextState}" not found in gameData.states`);
+        return {
+          text: `Error: State "${choice.nextState}" not found`,
+          choices: [],
+          actionResult: actionResult
+        };
+      }
       this.currentState = choice.nextState;
     }
     

@@ -95,7 +95,7 @@ function TextAdventure() {
             <div className="space-y-2">
               {choices.map((choice, index) => (
                 <button
-                  key={choice.id || index}
+                  key={`${choice.text}-${index}`}
                   onClick={() => handleChoice(choice)}
                   className="w-full text-left p-3 rounded border-2 border-blue-300 bg-blue-50 hover:bg-blue-100 transition-colors"
                 >
