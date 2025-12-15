@@ -1,6 +1,6 @@
 /**
  * Minimal Text Adventure Game Engine
- * Bare-bones state machine for choice-based games
+ * Supports state transitions and code execution
  */
 
 export class GameEngine {
@@ -8,35 +8,25 @@ export class GameEngine {
     this.gameData = gameData;
     this.currentState = gameData.startingState;
     this.history = [];
-    // Store any custom data you want
     this.customData = {};
   }
 
-  /**
-   * Get the current state object
-   */
   getCurrentState() {
     return this.gameData.states[this.currentState];
   }
 
-  /**
-   * Get the text for the current state
-   */
   getText() {
     const state = this.getCurrentState();
     return state.text;
   }
 
-  /**
-   * Get available choices for current state
-   */
   getChoices() {
     const state = this.getCurrentState();
     return state.choices || [];
   }
 
   /**
-   * Execute a choice - transitions to a new state
+   * Execute a choice - can do state transition and/or run code
    */
   makeChoice(choice) {
     this.history.push({
@@ -44,26 +34,34 @@ export class GameEngine {
       choice: choice
     });
     
-    this.currentState = choice.nextState;
+    let actionResult = null;
+    
+    // Execute action if specified
+    if (choice.action) {
+      const actionFn = this.gameData.actions[choice.action];
+      if (actionFn) {
+        actionResult = actionFn(this);
+      }
+    }
+    
+    // Transition to new state if specified
+    if (choice.nextState) {
+      this.currentState = choice.nextState;
+    }
     
     return {
       text: this.getText(),
-      choices: this.getChoices()
+      choices: this.getChoices(),
+      actionResult: actionResult
     };
   }
 
-  /**
-   * Reset game to starting state
-   */
   reset() {
     this.currentState = this.gameData.startingState;
     this.history = [];
     this.customData = {};
   }
 
-  /**
-   * Get/set custom data for your game mechanics
-   */
   setData(key, value) {
     this.customData[key] = value;
   }

@@ -1,127 +1,154 @@
 # Text Adventure - Minimal Boilerplate
 
-A bare-bones, multiple-choice text adventure framework. No assumptions about game mechanics - just a state machine with text and choices.
+A bare-bones, multiple-choice text adventure framework. Define everything in JSON with text and choices that can lead to other states and/or execute code.
 
 ## What This Is
 
 This is the **absolute minimum** needed for a choice-based text adventure:
 - States with text
-- Choices that lead to other states
-- Simple UI to display and interact
+- Choices that can:
+  - Lead to other states
+  - Execute custom code
+  - Do both
 
-**No built-in assumptions about:**
-- Inventory
-- Rooms/locations
-- Items
-- Combat
-- Stats
-- Anything else
-
-You can build whatever weird game mechanics you want on top of this!
+**No built-in assumptions about game mechanics** - you define everything!
 
 ## Files
 
-- `gameData.js` - Your game content (states and choices)
-- `gameEngine.js` - Minimal state machine (~60 lines)
+- `gameData.js` - Your game content (states, choices, actions)
+- `gameEngine.js` - Minimal engine (~70 lines)
 - `TextAdventure.jsx` - Simple React UI
 - `index.js` - Module exports
 
 ## How It Works
 
-The game is just a **state machine**:
+### Basic Structure (JSON-like)
 
 ```javascript
-{
+export const gameData = {
   startingState: 'start',
+  
   states: {
     start: {
       text: 'Some text here',
       choices: [
-        { id: 'choice1', text: 'Do something', nextState: 'somewhere' }
+        // Choice that leads to another state
+        { text: 'Go somewhere', nextState: 'somewhere' },
+        
+        // Choice that executes code
+        { text: 'Do something', action: 'doSomething' },
+        
+        // Choice that does both
+        { text: 'Do both', action: 'doSomething', nextState: 'somewhere' }
       ]
     }
-  }
-}
-```
-
-Each choice leads to a new state. That's it!
-
-## Usage
-
-### Basic Setup
-
-```jsx
-import { TextAdventure } from './textAdventure';
-
-function App() {
-  return <TextAdventure />;
-}
-```
-
-### Customize Your Game
-
-Edit `gameData.js` to create your story. Just add states and choices.
-
-### Add Custom Mechanics
-
-The engine has `customData` for storing anything:
-
-```javascript
-// In your choice handler or extended engine:
-gameEngine.setData('health', 100);
-gameEngine.setData('hasKey', true);
-const health = gameEngine.getData('health');
-```
-
-### Extend the Engine
-
-Want inventory? Combat? Stats? Add them yourself:
-
-```javascript
-class MyGameEngine extends GameEngine {
-  constructor(gameData) {
-    super(gameData);
-    this.inventory = [];
-    this.stats = { health: 100 };
-  }
+  },
   
-  // Add your methods here
-}
-```
-
-### Dynamic Choices
-
-You can generate choices programmatically:
-
-```javascript
-// In gameData.js, use a function to return choices based on game state
-states: {
-  shop: {
-    text: 'Welcome to the shop',
-    choices: (engine) => {
-      const hasGold = engine.getData('gold') > 0;
-      return hasGold 
-        ? [{ id: 'buy', text: 'Buy something', nextState: 'bought' }]
-        : [{ id: 'leave', text: 'Leave', nextState: 'outside' }];
+  actions: {
+    doSomething: (engine) => {
+      // Your code here
+      return 'Something happened!';
     }
   }
 }
 ```
 
-## Examples of What You Can Build
+### Choice Properties
+
+- `text` - What the button says (required)
+- `nextState` - Go to another state (optional)
+- `action` - Execute a function (optional)
+
+You can use one or both!
+
+## Examples
+
+### Example 1: Pure Navigation
+
+```javascript
+{
+  text: 'You are at a crossroads',
+  choices: [
+    { text: 'Go left', nextState: 'left' },
+    { text: 'Go right', nextState: 'right' }
+  ]
+}
+```
+
+### Example 2: Execute Code
+
+```javascript
+{
+  text: 'You see a button',
+  choices: [
+    { text: 'Press it', action: 'pressButton' }
+  ]
+}
+
+// In actions:
+actions: {
+  pressButton: (engine) => {
+    const count = engine.getData('presses') || 0;
+    engine.setData('presses', count + 1);
+    return `You pressed the button ${count + 1} times!`;
+  }
+}
+```
+
+### Example 3: Both (Execute Code + Navigate)
+
+```javascript
+{
+  text: 'You find a treasure chest',
+  choices: [
+    { 
+      text: 'Open it', 
+      action: 'getTreasure',
+      nextState: 'afterChest'
+    }
+  ]
+}
+
+// In actions:
+actions: {
+  getTreasure: (engine) => {
+    engine.setData('gold', (engine.getData('gold') || 0) + 100);
+    return 'You got 100 gold!';
+  }
+}
+```
+
+## Storing Data
+
+Use `engine.setData()` and `engine.getData()` to store anything:
+
+```javascript
+actions: {
+  myAction: (engine) => {
+    // Store data
+    engine.setData('inventory', ['sword', 'shield']);
+    engine.setData('health', 100);
+    engine.setData('anyObject', { foo: 'bar' });
+    
+    // Get data
+    const health = engine.getData('health');
+    
+    return `Health: ${health}`;
+  }
+}
+```
+
+## What You Can Build
 
 - Choose-your-own-adventure stories
-- Puzzle games
-- Dialogue systems
+- RPG dialogue systems
 - Interactive fiction
+- Educational games
+- Puzzles
 - Dating sims
-- RPG conversations
 - Mystery games
-- Horror games
-- Comedy adventures
-- Educational content
-- Literally anything with choices
+- Anything with choices!
 
 ## Current State
 
-🚧 **Not integrated into the main site** - This is standalone boilerplate code ready for you to customize and deploy when ready.
+🚧 **Not integrated into the main site** - This is standalone boilerplate ready for customization.

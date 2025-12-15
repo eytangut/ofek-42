@@ -33,6 +33,13 @@ function TextAdventure() {
     // Make the choice and get new state
     const result = gameEngine.makeChoice(choice);
     
+    // Add action result if there was one
+    if (result.actionResult) {
+      setHistory(prev => [...prev,
+        { text: result.actionResult, isChoice: false, isAction: true }
+      ]);
+    }
+    
     // Add result text to history
     setHistory(prev => [...prev,
       { text: result.text, isChoice: false }
@@ -63,9 +70,16 @@ function TextAdventure() {
             {history.map((entry, index) => (
               <div 
                 key={index} 
-                className={`mb-3 ${entry.isChoice ? 'text-blue-600 font-semibold' : 'text-gray-800'}`}
+                className={`mb-3 ${
+                  entry.isChoice 
+                    ? 'text-blue-600 font-semibold' 
+                    : entry.isAction
+                    ? 'text-purple-600 italic'
+                    : 'text-gray-800'
+                }`}
               >
                 {entry.isChoice && '> '}
+                {entry.isAction && '→ '}
                 {entry.text}
               </div>
             ))}
